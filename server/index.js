@@ -5,12 +5,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
 import salesRoutes from "./routes/sales.js";
 import authRoutes from "./routes/auth.js";
+<<<<<<< HEAD
 import debugRoutes from "./routes/debug.js";
 import settingsRoutes from "./routes/settings.js";
+=======
+>>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3
 
 // data imports
 import User from "./models/User.js";
@@ -41,12 +45,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 /* ROUTES */
+<<<<<<< HEAD
 app.use("/auth", authRoutes);
+=======
+
+>>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3
 app.use("/client", clientRoutes);
 app.use("/general", generalRoutes);
 app.use("/sales", salesRoutes);
+<<<<<<< HEAD
 app.use("/debug", debugRoutes);
 app.use("/settings", settingsRoutes);
+=======
+app.use("/auth", authRoutes);
+>>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;

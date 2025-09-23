@@ -21,9 +21,13 @@
   "author": "Asksource Team",
   "license": "MIT",
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
+=======
+    "bcryptjs": "^3.0.2",
+>>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "country-iso-2-to-3": "^1.1.0",

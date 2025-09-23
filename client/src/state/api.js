@@ -1,7 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_BASE_URL }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: process.env.REACT_APP_BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      // Ajouter le token d'authentification aux en-têtes
+      const token = getState().global.token;
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
   reducerPath: "adminApi",
   tagTypes: [
     "User",
@@ -12,6 +22,7 @@ export const api = createApi({
     "Admins",
     "Performance",
     "Dashboard",
+    "Auth",
   ],
   endpoints: (build) => ({
     getUser: build.query({
@@ -42,6 +53,15 @@ export const api = createApi({
       query: () => "general/dashboard",
       providesTags: ["Dashboard"],
     }),
+    // Endpoint d'authentification
+    login: build.mutation({
+      query: (credentials) => ({
+        url: "auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -52,4 +72,5 @@ export const {
   useGetTransactionsQuery,
   useGetGeographyQuery,
   useGetDashboardQuery,
+  useLoginMutation,
 } = api;

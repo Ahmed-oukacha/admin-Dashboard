@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import express from "express";
 import { loginAdmin, registerAdmin, verifyToken, logoutAdmin, activateUser } from "../controllers/auth.js";
 import { changePassword } from "../controllers/settings.js";
@@ -35,3 +36,14 @@ router.post("/logout", logoutAdmin);
 router.patch("/change-password", changePassword);
 
 export default router;
+=======
+import express from 'express';
+import { login } from '../controllers/auth.js';
+
+const router = express.Router();
+
+// POST /auth/login
+router.post('/login', login);
+
+export default router;
+>>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3

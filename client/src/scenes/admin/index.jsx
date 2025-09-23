@@ -1,13 +1,25 @@
 import React from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetAdminsQuery } from "state/api";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "components/Header";
 import CustomColumnMenu from "components/DataGridCustomColumnMenu";
 
 const Admin = () => {
   const theme = useTheme();
-  const { data, isLoading } = useGetAdminsQuery();
+  
+  // بيانات وهمية للمدراء
+  const data = [
+    {
+      _id: "admin1",
+      name: "Super Admin",
+      email: "admin@asksource.com",
+      phoneNumber: "+212-600-123456",
+      country: "Morocco",
+      occupation: "System Administrator",
+      role: "admin"
+    }
+  ];
+  const isLoading = false;
 
   const columns = [
     {

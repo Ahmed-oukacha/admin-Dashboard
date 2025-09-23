@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetUserPerformanceQuery } from "state/api";
 import { useSelector } from "react-redux";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "components/Header";
@@ -9,7 +8,32 @@ import CustomColumnMenu from "components/DataGridCustomColumnMenu";
 const Performance = () => {
   const theme = useTheme();
   const userId = useSelector((state) => state.global.userId);
-  const { data, isLoading } = useGetUserPerformanceQuery(userId);
+  
+  // بيانات وهمية للأداء
+  const data = {
+    user: {
+      _id: userId || "user1",
+      name: "Admin User",
+      email: "admin@asksource.com"
+    },
+    sales: [
+      {
+        _id: "perf1",
+        userId: userId || "user1",
+        createdAt: "2024-01-15",
+        projects: 25,
+        cost: "15.50"
+      },
+      {
+        _id: "perf2", 
+        userId: userId || "user1",
+        createdAt: "2024-02-15",
+        projects: 30,
+        cost: "18.75"
+      }
+    ]
+  };
+  const isLoading = false;
 
   const columns = [
     {
@@ -28,11 +52,10 @@ const Performance = () => {
       flex: 1,
     },
     {
-      field: "products",
-      headerName: "# of Products",
+      field: "projects",
+      headerName: "# of Projects",
       flex: 0.5,
       sortable: false,
-      renderCell: (params) => params.value.length,
     },
     {
       field: "cost",
@@ -46,7 +69,7 @@ const Performance = () => {
     <Box m="1.5rem 2.5rem">
       <Header
         title="PERFORMANCE"
-        subtitle="Track your Affiliate Sales Performance Here"
+        subtitle="Track your System Performance Here"
       />
       <Box
         mt="40px"

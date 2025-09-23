@@ -30,6 +30,15 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "admin", "superadmin"],
       default: "admin",
     },
+    avatarColor: {
+      type: String,
+      default: "#1976d2",
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    activationToken: String,
   },
   { timestamps: true }
 );

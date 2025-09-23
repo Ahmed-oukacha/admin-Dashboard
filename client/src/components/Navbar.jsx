@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LightModeOutlined,
   DarkModeOutlined,
@@ -8,9 +9,10 @@ import {
   ArrowDropDownOutlined,
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
-import { useDispatch } from "react-redux";
+import UserAvatar from "components/UserAvatar";
+import { useDispatch, useSelector } from "react-redux";
 import { setMode } from "state";
-import profileImage from "assets/profile.jpeg";
+import { useSearch } from "contexts/SearchContext";
 import {
   AppBar,
   Button,
@@ -26,7 +28,13 @@ import {
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const theme = useTheme();
+  const { searchTerm, setSearchTerm } = useSearch();
+
+  // استخدام بيانات المستخدم من authSlice للتأكد من الحصول على آخر التحديثات
+  const authUser = useSelector((state) => state.auth.user);
+  const currentUser = authUser || user;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
@@ -53,7 +61,11 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
             gap="3rem"
             p="0.1rem 1.5rem"
           >
-            <InputBase placeholder="Search..." />
+            <InputBase 
+              placeholder="Search..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <IconButton>
               <Search />
             </IconButton>
@@ -69,7 +81,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <LightModeOutlined sx={{ fontSize: "25px" }} />
             )}
           </IconButton>
-          <IconButton>
+          <IconButton onClick={() => navigate("/settings")}>
             <SettingsOutlined sx={{ fontSize: "25px" }} />
           </IconButton>
 
@@ -84,28 +96,23 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 gap: "1rem",
               }}
             >
-              <Box
-                component="img"
-                alt="profile"
-                src={profileImage}
-                height="32px"
-                width="32px"
-                borderRadius="50%"
-                sx={{ objectFit: "cover" }}
-              />
+              <UserAvatar user={currentUser} size={32} fontSize="0.9rem" />
               <Box textAlign="left">
                 <Typography
                   fontWeight="bold"
                   fontSize="0.85rem"
                   sx={{ color: theme.palette.secondary[100] }}
                 >
-                  {user.name}
+                  {currentUser.firstName && currentUser.lastName 
+                    ? `${currentUser.firstName} ${currentUser.lastName}`
+                    : currentUser.name || "Utilisateur"
+                  }
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
                   sx={{ color: theme.palette.secondary[200] }}
                 >
-                  {user.occupation}
+                  {currentUser.role === "superadmin" ? "Super Administrateur" : "Administrateur"}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined

@@ -7,8 +7,10 @@ import helmet from "helmet";
 import morgan from "morgan";
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
-import managementRoutes from "./routes/management.js";
 import salesRoutes from "./routes/sales.js";
+import authRoutes from "./routes/auth.js";
+import debugRoutes from "./routes/debug.js";
+import settingsRoutes from "./routes/settings.js";
 
 // data imports
 import User from "./models/User.js";
@@ -17,6 +19,7 @@ import ProductStat from "./models/ProductStat.js";
 import Transaction from "./models/Transaction.js";
 import OverallStat from "./models/OverallStat.js";
 import AffiliateStat from "./models/AffiliateStat.js";
+import AdminUser from "./models/AdminUser.js";
 import {
   dataUser,
   dataProduct,
@@ -38,10 +41,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 /* ROUTES */
+app.use("/auth", authRoutes);
 app.use("/client", clientRoutes);
 app.use("/general", generalRoutes);
-app.use("/management", managementRoutes);
 app.use("/sales", salesRoutes);
+app.use("/debug", debugRoutes);
+app.use("/settings", settingsRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;

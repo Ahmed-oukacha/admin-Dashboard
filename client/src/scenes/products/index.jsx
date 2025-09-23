@@ -86,13 +86,19 @@ const Product = ({
 };
 
 const Products = () => {
-  const { data, isLoading } = useGetProductsQuery();
+  const { data, isLoading, error } = useGetProductsQuery();
   const isNonMobile = useMediaQuery("(min-width: 1000px)");
 
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="PRODUCTS" subtitle="See your list of products." />
-      {data || !isLoading ? (
+      {isLoading ? (
+        <Typography>Loading...</Typography>
+      ) : error ? (
+        <Typography color="error">
+          Error loading products: {error.message || "Something went wrong"}
+        </Typography>
+      ) : data && data.length > 0 ? (
         <Box
           mt="20px"
           display="grid"
@@ -130,7 +136,7 @@ const Products = () => {
           )}
         </Box>
       ) : (
-        <>Loading...</>
+        <Typography>No products found.</Typography>
       )}
     </Box>
   );

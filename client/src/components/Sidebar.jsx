@@ -11,27 +11,23 @@ import {
   ListItemText,
   Typography,
   useTheme,
+  Button,
 } from "@mui/material";
 import {
   SettingsOutlined,
   ChevronLeft,
   ChevronRightOutlined,
   HomeOutlined,
-  ShoppingCartOutlined,
-  Groups2Outlined,
-  ReceiptLongOutlined,
-  PublicOutlined,
-  PointOfSaleOutlined,
-  TodayOutlined,
-  CalendarMonthOutlined,
-  AdminPanelSettingsOutlined,
-  TrendingUpOutlined,
-  PieChartOutlined,
+  FolderOutlined,
+  InsertDriveFileOutlined,
+  LogoutOutlined,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "state/authSlice";
 import FlexBetween from "./FlexBetween";
-import profileImage from "assets/profile.jpeg";
+import UserAvatar from "components/UserAvatar";
 
 const navItems = [
   {
@@ -39,56 +35,20 @@ const navItems = [
     icon: <HomeOutlined />,
   },
   {
-    text: "Client Facing",
+    text: "RAG System",
     icon: null,
   },
   {
-    text: "Products",
-    icon: <ShoppingCartOutlined />,
+    text: "Projects",
+    icon: <FolderOutlined />,
   },
   {
-    text: "Customers",
-    icon: <Groups2Outlined />,
+    text: "Files",
+    icon: <InsertDriveFileOutlined />,
   },
   {
-    text: "Transactions",
-    icon: <ReceiptLongOutlined />,
-  },
-  {
-    text: "Geography",
-    icon: <PublicOutlined />,
-  },
-  {
-    text: "Sales",
-    icon: null,
-  },
-  {
-    text: "Overview",
-    icon: <PointOfSaleOutlined />,
-  },
-  {
-    text: "Daily",
-    icon: <TodayOutlined />,
-  },
-  {
-    text: "Monthly",
-    icon: <CalendarMonthOutlined />,
-  },
-  {
-    text: "Breakdown",
-    icon: <PieChartOutlined />,
-  },
-  {
-    text: "Management",
-    icon: null,
-  },
-  {
-    text: "Admin",
-    icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Performance",
-    icon: <TrendingUpOutlined />,
+    text: "Settings",
+    icon: <SettingsOutlined />,
   },
 ];
 
@@ -102,7 +62,20 @@ const Sidebar = ({
   const { pathname } = useLocation();
   const [active, setActive] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
+  
+  // Récupérer les informations utilisateur depuis Redux
+  const { user: authUser } = useSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser());
+      navigate("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -132,7 +105,7 @@ const Sidebar = ({
               <FlexBetween color={theme.palette.secondary.main}>
                 <Box display="flex" alignItems="center" gap="0.5rem">
                   <Typography variant="h4" fontWeight="bold">
-                    ECOMVISION
+                    ASKSOURCE
                   </Typography>
                 </Box>
                 {!isNonMobile && (
@@ -157,9 +130,14 @@ const Sidebar = ({
                   <ListItem key={text} disablePadding>
                     <ListItemButton
                       onClick={() => {
+                        // تعطيل النقر على زر "Files" - يجب الوصول إليه من صفحة Projects فقط
+                        if (lcText === "files") {
+                          return;
+                        }
                         navigate(`/${lcText}`);
                         setActive(lcText);
                       }}
+                      disabled={lcText === "files"}
                       sx={{
                         backgroundColor:
                           active === lcText
@@ -168,7 +146,11 @@ const Sidebar = ({
                         color:
                           active === lcText
                             ? theme.palette.primary[600]
+                            : lcText === "files"
+                            ? theme.palette.grey[500] // لون باهت للزر المعطل
                             : theme.palette.secondary[100],
+                        opacity: lcText === "files" ? 0.5 : 1, // شفافية للزر المعطل
+                        cursor: lcText === "files" ? "not-allowed" : "pointer",
                       }}
                     >
                       <ListItemIcon
@@ -177,6 +159,8 @@ const Sidebar = ({
                           color:
                             active === lcText
                               ? theme.palette.primary[600]
+                              : lcText === "files"
+                              ? theme.palette.grey[500] // لون باهت للأيقونة المعطلة
                               : theme.palette.secondary[200],
                         }}
                       >
@@ -195,38 +179,59 @@ const Sidebar = ({
 
           <Box position="absolute" bottom="2rem">
             <Divider />
-            <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
-              <Box
-                component="img"
-                alt="profile"
-                src={profileImage}
-                height="40px"
-                width="40px"
-                borderRadius="50%"
-                sx={{ objectFit: "cover" }}
+            
+            {/* Informations utilisateur */}
+            <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 1rem 3rem">
+              <UserAvatar 
+                user={authUser || { name: user?.name || "Utilisateur" }} 
+                size={40} 
+                fontSize="1.1rem" 
               />
-              <Box textAlign="left">
+              <Box textAlign="left" flexGrow={1}>
                 <Typography
                   fontWeight="bold"
                   fontSize="0.9rem"
                   sx={{ color: theme.palette.secondary[100] }}
                 >
-                  {user.name}
+                  {authUser ? `${authUser.firstName} ${authUser.lastName}` : user?.name || "Utilisateur"}
                 </Typography>
                 <Typography
                   fontSize="0.8rem"
                   sx={{ color: theme.palette.secondary[200] }}
                 >
-                  {user.occupation}
+                  {authUser ? authUser.role === "superadmin" ? "Super Administrateur" : "Administrateur" : user?.occupation || "Admin"}
                 </Typography>
               </Box>
               <SettingsOutlined
                 sx={{
                   color: theme.palette.secondary[300],
-                  fontSize: "25px ",
+                  fontSize: "20px",
+                  cursor: "pointer",
                 }}
+                onClick={() => navigate("/settings")}
               />
             </FlexBetween>
+
+            {/* Bouton de déconnexion */}
+            <Box m="0 2rem 1rem 3rem">
+              <Button
+                fullWidth
+                onClick={handleLogout}
+                startIcon={<LogoutOutlined />}
+                sx={{
+                  backgroundColor: theme.palette.secondary[600],
+                  color: theme.palette.secondary[100],
+                  fontSize: "0.8rem",
+                  fontWeight: "bold",
+                  padding: "8px 16px",
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary[700],
+                  },
+                }}
+              >
+                Déconnexion
+              </Button>
+            </Box>
           </Box>
         </Drawer>
       )}

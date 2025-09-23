@@ -1,26 +1,40 @@
 {
-  "name": "server",
+  "name": "asksource-admin-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Asksource Admin Dashboard Backend - RAG System API Server",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "create-admin": "node createAdmin.js",
+    "quick-admin": "node quickAdmin.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "rag",
+    "admin",
+    "dashboard",
+    "asksource",
+    "api"
+  ],
+  "author": "Asksource Team",
+  "license": "MIT",
   "dependencies": {
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "country-iso-2-to-3": "^1.1.0",
+    "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "helmet": "^6.0.0",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.7.3",
     "morgan": "^1.10.0",
+    "nodemailer": "^7.0.6",
     "nodemon": "^2.0.20"
   }
 }

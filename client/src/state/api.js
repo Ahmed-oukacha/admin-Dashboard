@@ -5,11 +5,10 @@ export const api = createApi({
   reducerPath: "adminApi",
   tagTypes: [
     "User",
-    "Products",
-    "Customers",
+    "Projects",
+    "Files",
     "Transactions",
     "Geography",
-    "Sales",
     "Admins",
     "Performance",
     "Dashboard",
@@ -19,13 +18,13 @@ export const api = createApi({
       query: (id) => `general/user/${id}`,
       providesTags: ["User"],
     }),
-    getProducts: build.query({
-      query: () => "client/products",
-      providesTags: ["Products"],
+    getProjects: build.query({
+      query: () => "client/projects",
+      providesTags: ["Projects"],
     }),
-    getCustomers: build.query({
-      query: () => "client/customers",
-      providesTags: ["Customers"],
+    getFiles: build.query({
+      query: () => "client/files",
+      providesTags: ["Files"],
     }),
     getTransactions: build.query({
       query: ({ page, pageSize, sort, search }) => ({
@@ -39,18 +38,6 @@ export const api = createApi({
       query: () => "client/geography",
       providesTags: ["Geography"],
     }),
-    getSales: build.query({
-      query: () => "sales/sales",
-      providesTags: ["Sales"],
-    }),
-    getAdmins: build.query({
-      query: () => "management/admins",
-      providesTags: ["Admins"],
-    }),
-    getUserPerformance: build.query({
-      query: (id) => `management/performance/${id}`,
-      providesTags: ["Performance"],
-    }),
     getDashboard: build.query({
       query: () => "general/dashboard",
       providesTags: ["Dashboard"],
@@ -60,12 +47,9 @@ export const api = createApi({
 
 export const {
   useGetUserQuery,
-  useGetProductsQuery,
-  useGetCustomersQuery,
+  useGetProjectsQuery,
+  useGetFilesQuery,
   useGetTransactionsQuery,
   useGetGeographyQuery,
-  useGetSalesQuery,
-  useGetAdminsQuery,
-  useGetUserPerformanceQuery,
   useGetDashboardQuery,
 } = api;

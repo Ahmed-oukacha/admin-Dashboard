@@ -21,3 +21,4 @@ A comprehensive admin dashboard for managing RAG (Retrieval-Augmented Generation
 - **File Processing**: Document vectorization and indexing
 
 For all related questions and discussions about this project, check out the discord: https://discord.gg/2FfPeEk2mX
+

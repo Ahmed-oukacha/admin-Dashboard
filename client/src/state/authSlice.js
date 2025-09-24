@@ -23,10 +23,10 @@ export const loginUser = createAsyncThunk(
       }
 
       // Stocker le token dans localStorage
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      return data.data;
+      return data; // Return data directly instead of data.data
     } catch (error) {
       return rejectWithValue("Erreur de connexion réseau");
     }
@@ -38,6 +38,7 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData, { rejectWithValue }) => {
     try {
+      console.log('Registering user with data:', userData);
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -47,13 +48,15 @@ export const registerUser = createAsyncThunk(
       });
 
       const data = await response.json();
+      console.log('Registration response:', data);
 
       if (!response.ok) {
         return rejectWithValue(data.message || "Erreur lors de l'inscription");
       }
 
-      return data.data;
+      return data; // Return data directly, not data.data
     } catch (error) {
+      console.error('Registration network error:', error);
       return rejectWithValue("Erreur de réseau lors de l'inscription");
     }
   }
@@ -86,7 +89,7 @@ export const verifyToken = createAsyncThunk(
       }
 
       const data = await response.json();
-      return { user: data.data.user, token };
+      return { user: data.user, token }; // Return data.user directly
     } catch (error) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -136,6 +139,7 @@ const initialState = {
   error: null,
   isInitialized: false,
   isVerifying: false,
+  registrationMessage: null,
 };
 
 // Slice d'authentification
@@ -168,12 +172,18 @@ const authSlice = createSlice({
       state.error = null;
     },
     
+    // Action pour effacer le message d'inscription
+    clearRegistrationMessage: (state) => {
+      state.registrationMessage = null;
+    },
+    
     // Action pour réinitialiser l'état
     resetAuth: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
+      state.registrationMessage = null;
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
@@ -215,10 +225,14 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        // لا نقوم بتسجيل دخول المستخدم بعد التسجيل
+        // المستخدم يحتاج لموافقة المدير أولاً
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
         state.error = null;
+        // نحتفظ بالرسالة في البايلود
+        state.registrationMessage = action.payload.message;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -272,6 +286,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { initializeAuth, clearError, resetAuth, updateUser } = authSlice.actions;
+export const { initializeAuth, clearError, clearRegistrationMessage, resetAuth, updateUser } = authSlice.actions;
 
 export default authSlice.reducer;

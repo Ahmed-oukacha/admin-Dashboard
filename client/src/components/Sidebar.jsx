@@ -21,6 +21,7 @@ import {
   FolderOutlined,
   InsertDriveFileOutlined,
   LogoutOutlined,
+  PersonAddOutlined,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -78,7 +79,12 @@ const Sidebar = ({
   };
 
   useEffect(() => {
-    setActive(pathname.substring(1));
+    const path = pathname.substring(1);
+    if (path === "add-user") {
+      setActive("add user");
+    } else {
+      setActive(path);
+    }
   }, [pathname]);
 
   return (
@@ -134,6 +140,7 @@ const Sidebar = ({
                         if (lcText === "files") {
                           return;
                         }
+                        
                         navigate(`/${lcText}`);
                         setActive(lcText);
                       }}

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -70,8 +69,7 @@ AdminUserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    // Générer un salt et hasher le mot de passe
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -94,36 +92,3 @@ AdminUserSchema.methods.toJSON = function () {
 const AdminUser = mongoose.model("AdminUser", AdminUserSchema);
 
 export default AdminUser;
-=======
-
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-
-const AdminUserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
-});
-
-// Middleware pour hasher le mot de passe avant sauvegarde
-AdminUserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-export default mongoose.model('AdminUser', AdminUserSchema);
->>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3

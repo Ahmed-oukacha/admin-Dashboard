@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 import express from "express";
-import { loginAdmin, registerAdmin, verifyToken, logoutAdmin, activateUser } from "../controllers/auth.js";
-import { changePassword } from "../controllers/settings.js";
+import { loginAdmin, registerAdmin, verifyToken, logoutAdmin, activateAccount } from "../controllers/auth.js";
 
 const router = express.Router();
 
@@ -15,35 +13,19 @@ router.post("/register", registerAdmin);
 // @access  Public
 router.post("/login", loginAdmin);
 
-// @route   GET /auth/activate/:token
-// @desc    Activation du compte utilisateur
-// @access  Public
-router.get("/activate/:token", activateUser);
-
-// @route   GET /auth/verify
+// @route   POST /auth/verify-token
 // @desc    Vérifier le token JWT
 // @access  Private
-router.get("/verify", verifyToken);
+router.post("/verify-token", verifyToken);
 
 // @route   POST /auth/logout
 // @desc    Déconnexion administrateur
 // @access  Private
 router.post("/logout", logoutAdmin);
 
-// @route   PATCH /auth/change-password
-// @desc    Changer le mot de passe
-// @access  Private
-router.patch("/change-password", changePassword);
+// @route   GET /auth/activate/:token
+// @desc    Activer un compte administrateur
+// @access  Public
+router.get("/activate/:token", activateAccount);
 
 export default router;
-=======
-import express from 'express';
-import { login } from '../controllers/auth.js';
-
-const router = express.Router();
-
-// POST /auth/login
-router.post('/login', login);
-
-export default router;
->>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3

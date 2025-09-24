@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Paper,
@@ -15,12 +15,13 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { PersonAddOutlined } from "@mui/icons-material";
-import { registerUser } from "state/authSlice";
+import { registerUser, clearRegistrationMessage } from "state/authSlice";
 
 const Register = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { registrationMessage, isLoading: authLoading } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -30,15 +31,21 @@ const Register = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Nettoyer le message d'inscription quand on quitte le composant
+  useEffect(() => {
+    return () => {
+      dispatch(clearRegistrationMessage());
+    };
+  }, [dispatch]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Effacer l'erreur quand l'utilisateur commence à taper
+    // Clear error when user starts typing
     if (error) setError("");
   };
 
@@ -48,23 +55,23 @@ const Register = () => {
 
     // Validation côté client
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      setError("Veuillez remplir tous les champs obligatoires.");
+      setError("Please fill in all required fields.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
+      setError("Passwords do not match.");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères.");
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError("Format d'email invalide.");
+      setError("Invalid email format.");
       return;
     }
 
@@ -79,17 +86,27 @@ const Register = () => {
       }));
 
       if (registerUser.fulfilled.match(result)) {
-        // Inscription réussie, afficher message de confirmation
-        setSuccessMessage("تم إرسال طلب التسجيل بنجاح! سيتم إرسال إيميل للمدير للمراجعة والتفعيل.");
+        // Inscription réussie - Ne PAS rediriger vers le dashboard
+        // Le message sera affiché depuis registrationMessage dans Redux
         setError("");
-        // Ne pas rediriger vers le dashboard
+        // Réinitialiser le formulaire
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+        // Rediriger vers la page de connexion après 5 secondes pour lire le message
+        setTimeout(() => {
+          navigate("/");
+        }, 5000);
       } else {
         // Inscription échouée
-        setError(result.payload || "Erreur lors de l'inscription");
-        setSuccessMessage("");
+        setError(result.payload || "Registration failed");
       }
     } catch (err) {
-      setError("Erreur lors de l'inscription. Veuillez réessayer.");
+      setError("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -160,9 +177,9 @@ const Register = () => {
             </Alert>
           )}
 
-          {successMessage && (
+          {registrationMessage && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              {successMessage}
+              {registrationMessage}
             </Alert>
           )}
 
@@ -261,7 +278,7 @@ const Register = () => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={isLoading}
+              disabled={isLoading || authLoading}
               sx={{
                 mt: 3,
                 mb: 2,
@@ -274,7 +291,7 @@ const Register = () => {
                 },
               }}
             >
-              {isLoading ? (
+              {isLoading || authLoading ? (
                 <Box display="flex" alignItems="center" gap={1}>
                   <CircularProgress size={20} color="inherit" />
                   Inscription en cours...

@@ -1,489 +1,278 @@
-<<<<<<< HEAD
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import AdminUser from "../models/AdminUser.js";
-import crypto from "crypto";
-import { sendActivationEmailToAdmin, sendConfirmationToUser } from "../services/emailService.js";
 
-// Générer un token JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "7d", // Token valide 7 jours
+// --- Send Welcome Email Function ---
+async function sendWelcomeEmail({ to, firstName, lastName }) {
+  const emailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
   });
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h2>Bienvenue ${firstName} ${lastName} !</h2>
+      <p>Merci d'avoir créé un compte sur notre plateforme.</p>
+      <p>Votre demande a bien été prise en compte. Nous vous remercions pour votre confiance.</p>
+      <p><strong>Veuillez patienter pendant que l'administrateur examine et approuve votre inscription.</strong></p>
+      <p>Vous recevrez un email dès que votre compte sera activé.</p>
+      <br>
+      <p>Cordialement,<br>L'équipe d'administration</p>
+    </div>
+  `;
+
+  try {
+    const info = await emailTransporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject: 'Bienvenue sur notre plateforme !',
+      html
+    });
+    console.log('Welcome email sent:', info);
+  } catch (err) {
+    console.error('Erreur lors de l\'envoi de l\'email de bienvenue (sendMail):', err);
+  }
+}
+
+export const registerAdmin = async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, avatarColor } = req.body;
+
+    const existingUser = await AdminUser.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Un utilisateur avec cet email existe déjà" });
+    }
+
+    const activationToken = jwt.sign(
+      { email, firstName, lastName },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const user = new AdminUser({
+      email,
+      password,
+      firstName,
+      lastName,
+      avatarColor: avatarColor || "#4CAF50",
+      isActive: false,
+      activationToken
+    });
+
+
+    await user.save();
+
+    // Send welcome email to the registering user (in French)
+    try {
+      await sendWelcomeEmail({
+        to: email,
+        firstName,
+        lastName
+      });
+    } catch (welcomeError) {
+      console.error('Erreur lors de l\'envoi de l\'email de bienvenue:', welcomeError);
+    }
+
+
+    // Send email to admin
+    try {
+      const emailTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
+      const activationLink = `${process.env.SERVER_URL || 'http://localhost:5001'}/auth/activate/${activationToken}`;
+
+      await emailTransporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.ADMIN_EMAIL,
+        subject: 'Nouvelle demande d activation de compte',
+        html: `
+          <h2>Nouvelle demande d'activation</h2>
+          <p>Un nouvel utilisateur souhaite créer un compte:</p>
+          <p><strong>Nom:</strong> ${firstName} ${lastName}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><a href="${activationLink}">Cliquez ici pour activer le compte</a></p>
+        `
+      });
+
+      res.status(201).json({
+        message: "Compte créé avec succès! Veuillez attendre l'approbation de l'administrateur.",
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatarColor: user.avatarColor,
+          isActive: user.isActive
+        }
+      });
+    } catch (emailError) {
+      res.status(201).json({
+        message: "Compte créé avec succès! L'administrateur sera notifié pour l'activation.",
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatarColor: user.avatarColor,
+          isActive: user.isActive
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
 };
 
-// @desc    Connexion administrateur
-// @route   POST /auth/login
-// @access  Public
 export const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation des champs requis
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Veuillez fournir une adresse e-mail et un mot de passe"
-      });
-    }
-
-    // Vérifier si l'utilisateur existe
-    const user = await AdminUser.findOne({ email }).select("+password");
-    
+    const user = await AdminUser.findOne({ email });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Identifiants invalides"
-      });
+      return res.status(400).json({ message: "Email ou mot de passe incorrect" });
     }
 
-    // Vérifier si le compte est actif
     if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: "Votre compte a été désactivé. Contactez l'administrateur."
+      return res.status(403).json({ 
+        message: "Votre compte n'est pas encore activé. Veuillez attendre l'approbation de l'administrateur." 
       });
     }
 
-    // Vérifier si le compte est activé
-    if (!user.isActivated) {
-      return res.status(401).json({
-        success: false,
-        message: "Votre compte n'est pas encore activé. Veuillez attendre l'activation par l'administrateur."
-      });
-    }
-
-    // Vérifier le mot de passe
     const isPasswordValid = await user.comparePassword(password);
-    
     if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Identifiants invalides"
-      });
+      return res.status(400).json({ message: "Email ou mot de passe incorrect" });
     }
 
-    // Mettre à jour la date de dernière connexion
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Générer le token
-    const token = generateToken(user._id);
-
-    // Réponse de succès
-    res.status(200).json({
-      success: true,
-      message: "Connexion réussie",
-      data: {
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          lastLogin: user.lastLogin
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error("Erreur lors de la connexion:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur interne du serveur"
-    });
-  }
-};
-
-// @desc    تسجيل مستخدم جديد
-// @route   POST /auth/register
-// @access  Public
-export const registerAdmin = async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, role = "admin" } = req.body;
-
-    // Validation des champs requis
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Veuillez fournir tous les champs requis (prénom, nom, email, mot de passe)"
-      });
-    }
-
-    // Validation de l'email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Format d'email invalide"
-      });
-    }
-
-    // Validation du mot de passe (minimum 6 caractères)
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Le mot de passe doit contenir au moins 6 caractères"
-      });
-    }
-
-    // Vérifier si l'utilisateur existe déjà
-    const existingUser = await AdminUser.findOne({ email });
-    
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Un utilisateur avec cet email existe déjà"
-      });
-    }
-
-    // إنشاء token للتفعيل
-    const activationToken = crypto.randomBytes(32).toString('hex');
-    const activationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 ساعة
-
-    // Créer un nouveau utilisateur (غير مفعل)
-    const user = await AdminUser.create({
-      firstName,
-      lastName,
-      email,
-      password, // Le modèle se charge du hashage automatiquement
-      role,
-      isActive: false, // غير مفعل بعد
-      isActivated: false, // ينتظر التفعيل
-      activationToken,
-      activationTokenExpires
-    });
-
-    // إرسال إيميل للأدمين للتفعيل
-    const emailSent = await sendActivationEmailToAdmin(
-      email, 
-      `${firstName} ${lastName}`, 
-      activationToken
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
     );
 
-    // إرسال إيميل تأكيد للمستخدم
-    await sendConfirmationToUser(email, `${firstName} ${lastName}`);
-
-    res.status(201).json({
-      success: true,
-      message: "Demande d'inscription envoyée avec succès. En attente d'activation par l'administrateur.",
-      data: {
-        message: "Vous recevrez une notification d'activation lors de l'approbation de votre demande",
+    res.status(200).json({
+      message: "Connexion réussie",
+      token,
+      user: {
+        id: user._id,
         email: user.email,
-        emailSent
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatarColor: user.avatarColor
       }
     });
-
   } catch (error) {
-    console.error("Erreur lors de l'inscription:", error);
-    
-    // Gestion des erreurs de validation MongoDB
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: messages.join(', ')
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Erreur interne du serveur"
-    });
+    console.error("Erreur lors de la connexion:", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
-// @desc    Vérifier le token JWT
-// @route   GET /auth/verify
-// @access  Private
 export const verifyToken = async (req, res) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
-
+    
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Aucun token fourni"
-      });
+      return res.status(401).json({ message: "Token manquant" });
     }
 
-    // Vérifier le token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await AdminUser.findById(decoded.userId).select("-password");
     
-    // Trouver l'utilisateur
-    const user = await AdminUser.findById(decoded.id);
-    
-    if (!user || !user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: "Token invalide"
-      });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
     res.status(200).json({
-      success: true,
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          lastLogin: user.lastLogin
-        }
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatarColor: user.avatarColor
       }
     });
-
   } catch (error) {
     console.error("Erreur lors de la vérification du token:", error);
-    res.status(401).json({
-      success: false,
-      message: "Token invalide"
-    });
+    res.status(401).json({ message: "Token invalide" });
   }
 };
 
-// @desc    Déconnexion (optionnel - côté client principalement)
-// @route   POST /auth/logout
-// @access  Private
-export const logoutAdmin = async (req, res) => {
-  try {
-    // Note: Avec JWT, la déconnexion se fait principalement côté client
-    // en supprimant le token. Ici on peut juste confirmer la déconnexion.
-    
-    res.status(200).json({
-      success: true,
-      message: "Déconnexion réussie"
-    });
-
-  } catch (error) {
-    console.error("Erreur lors de la déconnexion:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur interne du serveur"
-    });
-  }
-};
-
-// @desc    تفعيل المستخدم
-// @route   GET /auth/activate/:token
-// @access  Public
-export const activateUser = async (req, res) => {
+export const activateAccount = async (req, res) => {
   try {
     const { token } = req.params;
 
-    // البحث عن المستخدم بالـ token
-    const user = await AdminUser.findOne({
-      activationToken: token,
-      activationTokenExpires: { $gt: Date.now() }
-    });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { email } = decoded;
 
+    const user = await AdminUser.findOne({ email, activationToken: token });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Token d'activation invalide ou expiré"
-      });
+      return res.status(400).send(`
+        <html>
+          <head><title>Erreur d activation</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h2 style="color: red;">Token d activation invalide</h2>
+            <p>Ce lien d activation n est pas valide.</p>
+          </body>
+        </html>
+      `);
     }
 
-    // تفعيل المستخدم
-    user.isActivated = true;
+    if (user.isActive) {
+      return res.status(200).send(`
+        <html>
+          <head><title>Compte deja active</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h2 style="color: green;">Compte deja active</h2>
+            <p>Ce compte est deja active.</p>
+          </body>
+        </html>
+      `);
+    }
+
     user.isActive = true;
     user.activationToken = null;
-    user.activationTokenExpires = null;
     await user.save();
 
-    // إرسال رد مع صفحة تأكيد بالفرنسية
     res.status(200).send(`
-      <!DOCTYPE html>
-      <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Activation réussie ✅</title>
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.8s ease-in;
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .success-container {
-            background: white;
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            animation: slideUp 0.6s ease-out;
-          }
-          @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-          }
-          .success-icon {
-            font-size: 80px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            animation: bounce 1s infinite;
-          }
-          @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-          }
-          h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 15px;
-            font-weight: bold;
-          }
-          .user-info {
-            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 25px 0;
-            border: 2px solid #4CAF50;
-          }
-          .user-info p {
-            color: #2d5016;
-            font-size: 16px;
-            margin: 8px 0;
-            font-weight: 500;
-          }
-          .message {
-            color: #555;
-            font-size: 18px;
-            line-height: 1.6;
-            margin: 20px 0;
-          }
-          .close-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-          }
-          .close-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-          }
-          .status {
-            background: #e8f5e8;
-            color: #2d5016;
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            font-weight: bold;
-            margin: 10px 0;
-            border: 2px solid #4CAF50;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="success-container">
-          <div class="success-icon">✅</div>
-          <h1>Activation réussie !</h1>
-          
-          <div class="status">🎉 Compte activé</div>
-          
-          <div class="user-info">
-            <p><strong>👤 Utilisateur :</strong> ${user.firstName} ${user.lastName}</p>
-            <p><strong>📧 Email :</strong> ${user.email}</p>
-            <p><strong>⏰ Date d'activation :</strong> ${new Date().toLocaleString('fr-FR')}</p>
-          </div>
-          
-          <p class="message">
-            🎊 Félicitations ! Votre compte a été activé avec succès dans le système Asksource Admin Dashboard.<br>
-            L'utilisateur peut maintenant se connecter et accéder à toutes les fonctionnalités.
-          </p>
-          
-          <button class="close-btn" onclick="window.close()">
-            Fermer la fenêtre
-          </button>
-          
-          <script>
-            // Fermeture automatique après 10 secondes
-            setTimeout(() => {
-              alert('Activation réussie ! La fenêtre va se fermer maintenant.');
-              window.close();
-            }, 10000);
-          </script>
-        </div>
-      </body>
+      <html>
+        <head><title>Compte active avec succes</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2 style="color: green;">Compte active avec succes!</h2>
+          <p><strong>Utilisateur:</strong> ${user.firstName} ${user.lastName}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p>L utilisateur peut maintenant se connecter.</p>
+        </body>
       </html>
     `);
 
   } catch (error) {
-    console.error("Erreur lors de l'activation de l'utilisateur:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur système"
-    });
+    console.error("Erreur lors de l activation:", error);
+    res.status(400).send(`
+      <html>
+        <head><title>Erreur d activation</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2 style="color: red;">Erreur d activation</h2>
+          <p>Une erreur s est produite.</p>
+        </body>
+      </html>
+    `);
   }
 };
-=======
-import AdminUser from '../models/AdminUser.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
-// Texte d'erreur en français
-const ERROR_MSG = {
-  userNotFound: "Adresse e-mail ou mot de passe incorrect.",
-  invalidPassword: "Adresse e-mail ou mot de passe incorrect.",
-  server: "Erreur serveur. Veuillez réessayer plus tard."
-};
-
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-  
-  console.log('محاولة تسجيل دخول:', { email, password: '***' });
-  
+export const logoutAdmin = async (req, res) => {
   try {
-    const user = await AdminUser.findOne({ email });
-    console.log('المستخدم الموجود:', user ? 'موجود' : 'غير موجود');
-    
-    if (!user) {
-      return res.status(401).json({ message: ERROR_MSG.userNotFound });
-    }
-    
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('مطابقة كلمة المرور:', isMatch);
-    
-    if (!isMatch) {
-      return res.status(401).json({ message: ERROR_MSG.invalidPassword });
-    }
-    
-    // Générer le JWT
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET || 'votre_jwt_secret',
-      { expiresIn: '1d' }
-    );
-    
-    console.log('تم إنشاء التوكن بنجاح');
-    res.json({ token, user: { email: user.email } });
-  } catch (err) {
-    console.error('خطأ في تسجيل الدخول:', err);
-    res.status(500).json({ message: ERROR_MSG.server });
+    res.status(200).json({ message: "Déconnexion réussie" });
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion:", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
->>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3

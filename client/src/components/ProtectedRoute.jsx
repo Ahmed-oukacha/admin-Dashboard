@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
@@ -62,25 +61,6 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Afficher le contenu protégé si authentifié
-=======
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-
-const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useSelector((state) => state.global.isAuthenticated);
-  const token = useSelector((state) => state.global.token);
-  const location = useLocation();
-
-  // Vérifier si l'utilisateur est authentifié
-  const isUserAuthenticated = isAuthenticated && token;
-
-  if (!isUserAuthenticated) {
-    // Rediriger vers la page de connexion avec l'URL de retour
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
->>>>>>> 6a2cba5a12363e44188d8128acc6aea9967c95e3
   return children;
 };
 

@@ -99,7 +99,7 @@ const Files = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get(`http://194.163.186.182/api/v1/data/assets/${projectId}`);
+      const response = await axios.get(`/api/v1/data/assets/${projectId}`);
       
       console.log('Response data:', response.data);
       console.log('Type of response.data:', typeof response.data);
@@ -137,7 +137,7 @@ const Files = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      await axios.post(`http://194.163.186.182/api/v1/data/upload/${projectId}`, formData, {
+      await axios.post(`/api/data/upload/${projectId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -173,8 +173,8 @@ const Files = () => {
       setIsDeletingFile(true);
       setDeletingFileName(assetName);
       
-      await axios.delete(`http://194.163.186.182/api/v1/data/delete/${projectId}/${encodeURIComponent(assetName)}`);
-      
+      // await axios.delete(`http://194.163.186.182/api/v1/data/delete/${projectId}/${encodeURIComponent(assetName)}`);
+      await axios.delete(`/api/data/delete/${projectId}/${encodeURIComponent(assetName)}`);
       alert("Fichier supprimé avec succès!");
       
       // Recharger la liste des fichiers
@@ -222,7 +222,8 @@ const Files = () => {
       formData.append('file', file);
 
       await axios.put(
-        `http://194.163.186.182/api/v1/data/update/${projectId}/${encodeURIComponent(selectedFileForUpdate)}`, 
+        `/api/data/update/${projectId}/${encodeURIComponent(selectedFileForUpdate)}`, 
+
         formData,
         {
           headers: {

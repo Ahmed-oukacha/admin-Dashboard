@@ -65,7 +65,7 @@ const ProcessOptionsModal = ({
       console.log('Données envoyées pour le traitement:', requestBody);
 
       const response = await axios.post(
-        `http://194.163.186.182/api/v1/data/process/${projectId}`,
+        `/api/data/process/${projectId}`,
         requestBody,
         {
           headers: {

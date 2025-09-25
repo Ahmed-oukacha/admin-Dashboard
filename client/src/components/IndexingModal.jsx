@@ -29,7 +29,7 @@ const IndexingModal = ({ open, onClose, projectId }) => {
       setIsIndexing(true);
 
       const response = await axios.post(
-        `http://194.163.186.182/api/v1/nlp/index/push/${projectId}`,
+        `/api/nlp/index/push/${projectId}`,
         {
           do_reset: doReset ? 1 : 0
         }

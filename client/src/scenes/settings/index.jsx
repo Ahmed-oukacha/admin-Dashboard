@@ -157,7 +157,7 @@ const Settings = () => {
       });
       
       const response = await axios.patch(
-        `http://localhost:5001/settings/user/${userId}`,
+        `${process.env.REACT_APP_BASE_URL}/settings/user/${userId}`,
         {
           name: profileData.name,
           email: profileData.email,
@@ -221,7 +221,7 @@ const Settings = () => {
       console.log("Sending password change for user:", userId);
       
       const response = await axios.post(
-        `http://localhost:5001/settings/change-password`,
+        `${process.env.REACT_APP_BASE_URL}/settings/change-password`,
         {
           userId: userId,
           currentPassword: passwordData.currentPassword,
@@ -264,7 +264,7 @@ const Settings = () => {
       setError("");
       
       const response = await axios.patch(
-        `http://localhost:5001/settings/user/${userId}`,
+        `${process.env.REACT_APP_BASE_URL}/settings/user/${userId}`,
         {
           avatarColor: avatarData.color,
         },

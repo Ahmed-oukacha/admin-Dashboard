@@ -25,7 +25,8 @@ const ActivationPage = () => {
   useEffect(() => {
     const activateAccount = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/auth/activate/${token}`, {
+        // const response = await fetch(`http://localhost:5001/auth/activate/${token}`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/activate/${token}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

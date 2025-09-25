@@ -1,28 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/data/projects",
+      "source": "/api/projects",
       "destination": "http://194.163.186.182/api/v1/data/projects"
-    },
-    {
-      "source": "/api/data/upload",
-      "destination": "http://194.163.186.182/api/v1/data/upload"
-    },
-    {
-      "source": "/api/data/process",
-      "destination": "http://194.163.186.182/api/v1/data/process"
-    },
-    {
-      "source": "/api/nlp/index/push/:projectId",
-      "destination": "http://194.163.186.182/api/v1/nlp/index/push/:projectId"
-    },
-    {
-      "source": "/api/nlp/index/info/:projectId",
-      "destination": "http://194.163.186.182/api/v1/nlp/index/info/:projectId"
-    },
-    {
-      "source": "/api/data/projects/:projectId",
-      "destination": "http://194.163.186.182/api/v1/data/projects/:projectId"
     }
   ]
 }

@@ -105,7 +105,7 @@ const Projects = () => {
       
       // Récupérer la liste des projets
       // const response = await axios.get('http://194.163.186.182/api/v1/data/projects');
-      const response = await axios.get("/api/data/projects");
+      const response = await axios.get("/api/projects");
       // S'assurer que les données sont un tableau
       let projectsData = response.data;
       if (Array.isArray(projectsData)) {

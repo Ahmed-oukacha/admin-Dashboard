@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/external/data/:path*",
-      "destination": "http://194.163.186.182/api/v1/data/:path*"
-    },
-    {
-      "source": "/api/external/nlp/:path*",
-      "destination": "http://194.163.186.182/api/v1/nlp/:path*"
+      "source": "/api/projects",
+      "destination": "http://194.163.186.182/api/v1/data/projects"
     }
   ]
 }

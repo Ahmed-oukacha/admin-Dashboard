@@ -208,7 +208,7 @@ const Projects = () => {
 
     try {
       setIsCreating(true);
-      await axios.post('/api/data/projects', {
+      await axios.post('/api/projects', {
         project_id: newProjectId
       });
       

@@ -255,7 +255,7 @@ const Projects = () => {
       setDeletingProjectId(projectId);
       
       // Supprimer le projet via l'API
-      await axios.delete(`/api/projects/${projectId}`);
+      await axios.delete(`/api/data/projects/${projectId}`);
       
       // Afficher un message de succès
       alert("Projet supprimé avec succès!");

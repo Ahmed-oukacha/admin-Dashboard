@@ -5,6 +5,10 @@
       "destination": "http://194.163.186.182/api/v1/data/projects"
     },
     {
+      "source": "/api/data/projects/:projectId",
+      "destination": "http://194.163.186.182/api/v1/data/projects/:projectId"
+    },
+    {
       "source": "/api/nlp/index/info/:projectId",
       "destination": "http://194.163.186.182/api/v1/nlp/index/info/:projectId"
     },

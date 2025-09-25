@@ -1,8 +1,48 @@
 {
   "rewrites": [
     {
-      "source": "/api/projects",
-      "destination": "http://194.163.186.182/api/v1/data/projects"
+      "source": "/api/data/projects",
+      "destination": "http://194.163.168.182/api/v1/data/projects"
+    },
+    {
+      "source": "/api/data/upload",
+      "destination": "http://194.163.168.182/api/v1/data/upload"
+    },
+    {
+      "source": "/api/data/process",
+      "destination": "http://194.163.168.182/api/v1/data/process"
+    },
+    {
+      "source": "/api/nlp/index/push/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/push/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/info/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/info/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/search/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/search/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/hybrid_search/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/hybrid_search/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/answer_search/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/answer_search/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/hybrid_search_cross/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/hybrid_search_cross/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/answer_hybrid/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/answer_hybrid/:projectId"
+    },
+    {
+      "source": "/api/nlp/index/answer_hybrid_cross/:projectId",
+      "destination": "http://194.163.168.182/api/v1/nlp/index/answer_hybrid_cross/:projectId"
     }
   ]
 }

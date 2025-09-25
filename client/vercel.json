@@ -3,6 +3,11 @@
     {
       "source": "/api/projects",
       "destination": "http://194.163.186.182/api/v1/data/projects"
+    },
+    {
+      "source": "/api/nlp/index/info/:projectId",
+      "destination": "http://194.163.186.182/api/v1/nlp/index/info/:projectId"
     }
   ]
 }
+  

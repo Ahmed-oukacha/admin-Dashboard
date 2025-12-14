@@ -6,35 +6,35 @@
     },
     {
       "source": "/api/data/projects/:projectId",
-      "destination": "http://194.163.186.182/api/v1/data/projects/:projectId"
+      "destination": "http://34.14.43.129/api/v1/data/projects/:projectId"
     },
     {
       "source": "/api/nlp/index/info/:projectId",
-      "destination": "http://194.163.186.182/api/v1/nlp/index/info/:projectId"
+      "destination": "http://34.14.43.129/api/v1/nlp/index/info/:projectId"
     },
     {
       "source": "/api/v1/data/assets/:projectId",
-      "destination": "http://194.163.186.182/api/v1/data/assets/:projectId"
+      "destination": "http://34.14.43.129/api/v1/data/assets/:projectId"
     },
      {
       "source": "/api/data/upload/:projectId",
-      "destination": "http://194.163.186.182/api/v1/data/upload/:projectId"
+      "destination": "http://34.14.43.129/api/v1/data/upload/:projectId"
     },
     {
       "source": "/api/data/delete/:projectId/:assetName",
-      "destination": "http://194.163.186.182/api/v1/data/delete/:projectId/:assetName"
+      "destination": "http://34.14.43.129/api/v1/data/delete/:projectId/:assetName"
     },
      {
       "source": "/api/data/update/:projectId/:selectedFileForUpdate",
-      "destination": "http://194.163.186.182/api/v1/data/update/:projectId/:selectedFileForUpdate"
+      "destination": "http://34.14.43.129/api/v1/data/update/:projectId/:selectedFileForUpdate"
     },
     {
       "source": "/api/data/process/:projectId",
-      "destination": "http://194.163.186.182/api/v1/data/process/:projectId"
+      "destination": "http://34.14.43.129/api/v1/data/process/:projectId"
     },
     {
       "source": "/api/nlp/index/push/:projectId",
-      "destination": "http://194.163.186.182/api/v1/nlp/index/push/:projectId"
+      "destination": "http://34.14.43.129/api/v1/nlp/index/push/:projectId"
     }
   ]
 }

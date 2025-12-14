@@ -1,7 +1,7 @@
 import AdminUser from '../models/AdminUser.js';
 import axios from 'axios';
 
-const RAG_API_URL = 'http://194.163.186.182/api/v1/data';
+const RAG_API_URL = 'http://34.14.43.129/api/v1/data';
 
 // @desc    الحصول على إحصائيات Dashboard
 // @route   GET /general/dashboard-stats
@@ -50,7 +50,7 @@ export const getDashboardStats = async (req, res) => {
           console.log(`📄 جلب بيانات المشروع: ${projectId}`);
           
           // جلب الملفات
-          const filesResponse = await axios.get(`http://194.163.186.182/api/v1/data/assets/${projectId}`, {
+          const filesResponse = await axios.get(`http://34.14.43.129/api/v1/data/assets/${projectId}`, {
             timeout: 5000
           });
           
@@ -85,7 +85,7 @@ export const getDashboardStats = async (req, res) => {
           // جلب معلومات الفهرسة
           try {
             const indexInfoResponse = await axios.get(
-              `http://194.163.186.182/api/v1/nlp/index/info/${projectId}`,
+              `http://34.14.43.129/api/v1/nlp/index/info/${projectId}`,
               {
                 timeout: 5000,
                 headers: {
@@ -134,7 +134,7 @@ export const getDashboardStats = async (req, res) => {
       try {
         const projectId = project.project_id || project.id;
         const indexInfoResponse = await axios.get(
-          `http://194.163.186.182/api/v1/nlp/index/info/${projectId}`,
+          `http://34.14.43.129/api/v1/nlp/index/info/${projectId}`,
           { timeout: 5000 }
         );
         
